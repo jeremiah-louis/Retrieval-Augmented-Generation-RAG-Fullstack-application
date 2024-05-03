@@ -14,12 +14,12 @@ manager.register("query_index")
 manager.connect()
 manager.register("insert_into_index")
 
-#----------------------------------------------------------routing------------------------------------------------------#
+#----------------------------------------------------------'/query' routing------------------------------------------------------#
 #routes the 'query_index' function to local URL 
 @app.route('/query', methods=["GET"])
 def query_index():
     global index
-    # Gets a response from the request 
+    # Gets a text response from the request 
     query_text = request.args.get("text",None)
     # Check if query is empty 
     if query_text is None:
@@ -30,23 +30,33 @@ def query_index():
     # manager connects the query index to 
     response = manager.query_index(query_text)._getvalue()
     return str(response), 200
-#-------------------------------------------------------end of routing------------------------------------------------#
+#-------------------------------------------------------'/query' routing------------------------------------------------#
+#routes the 'uploadFile' function to local url : accepts only POST requests 
 @app.route("/uploadFile", methods=["POST"])
 def upload_file():
     global manager
+    # Checks if incoming request contains a "file"
     if "file" not in request.files:
+        #returns "400" bad request
         return "Please send a POST request with a file", 400
-
+    #initialises file_path to none for reassignment 
     filepath = None
+    # Handles exceptions for file uploads 
     try:
+        # obtains file POST request from HTML form
         uploaded_file = request.files["file"]
+        # runs security checks on "uploaded_file"
         filename = secure_filename(uploaded_file.filename)
+        # creates a file path for uploaded file  
         filepath = os.path.join("documents", os.path.basename(filename))
+        # saves the 'uploaded_file' in the file path
         uploaded_file.save(filepath)
-
+        # Checks if "file-name" was included as doc_id
         if request.form.get("filename_as_doc_id", None) is not None:
+            #if true: stores the 'filename' as 'doc_id' using the manager object
             manager.insert_into_index(filepath, doc_id=filename)
         else:
+            # else: use manager object to generate a new 'doc_id'
             manager.insert_into_index(filepath)
     except Exception as e:
         # cleanup temp file
