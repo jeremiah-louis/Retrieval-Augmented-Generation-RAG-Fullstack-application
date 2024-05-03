@@ -21,18 +21,18 @@ def initialize_index():
     global index
     # a variable named 'storage_context' that stores the StorageContext instance
     with lock:
-        storage_context = StorageContext.from_defaults(persist_dir='backend/document')
+        storage_context = StorageContext.from_defaults(persist_dir='Backend/document')
         # Check if document directory exists
-        if os.path.exists('backend/document'):
+        if os.path.exists('Backend/document'):
             # retrieves vector indices from local storage directory
             index = load_index_from_storage(storage_context)
         else:
             # a variable named 'documents' that loads the documents from the 'paul-graham-file' directory
-            documents = SimpleDirectoryReader("backend/paul-graham-file").load_data()
+            documents = SimpleDirectoryReader("Backend/paul-graham-file").load_data()
             # generates new vector indices based on loaded documents
-            index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
+            index = VectorStoreIndex.from_documents(documents)
             # store vector indices inside 'backend/document' directory
-            storage_context.persist('backend/document')
+            storage_context.persist('Backend/document')
             pass 
 #---------------------------------------------------------end of indexing blocks----------------------------------#
 
